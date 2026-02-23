@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitoring Progress Panel PT. ARYATEK KONTROL SEJAHTERA</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .header-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #00366d;
+            gap: 30px;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            flex: 1;
+        }
+
+        .company-logo {
+            width: 120px;
+            height: 100px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%);
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 2px 8px rgba(0, 102, 204, 0.15);
+        }
+
+        .company-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+        }
+
+        .company-info {
+            flex: 1;
+        }
+
+        .company-info h1 {
+            margin: 0;
+            color: #00366d;
+            font-size: 28px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            line-height: 1.2;
+        }
+
+        .company-info p {
+            margin: 8px 0 0 0;
+            color: #0066cc;
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+        }
+
+        .datetime-info {
+            text-align: right;
+            font-size: 12px;
+            color: #666;
+            min-width: 150px;
+        }
+
+        .datetime-info p {
+            margin: 5px 0;
+            font-weight: 500;
+        }
+
+        .info-box {
+            background-color: #e3f2fd;
+            border-left: 4px solid #0066cc;
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #1565c0;
+        }
+
+        .controls {
+            text-align: center;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        button:hover {
+            background-color: #0052a3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        button.danger {
+            background-color: #f56565;
+        }
+
+        button.danger:hover {
+            background-color: #e53e3e;
+        }
+
+        button.success {
+            background-color: #48bb78;
+        }
+
+        button.success:hover {
+            background-color: #38a169;
+        }
+
+        .filter-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-section label {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .filter-section select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .stat-box {
+            background-color: #f0f0f0;
+            padding: 15px;
+            border-radius: 4px;
+            text-align: center;
+            border-top: 4px solid #0066cc;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #0066cc;
+            margin-top: 8px;
+        }
+
+        .group-section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            background-color: #fafafa;
+        }
+
+        .group-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            background: linear-gradient(135deg, #0066cc 0%, #00366d 100%);
+            color: white;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .group-header:hover {
+            opacity: 0.9;
+        }
+
+        .group-toggle {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            text-align: center;
+            line-height: 20px;
+        }
+
+        .group-title {
+            flex: 1;
+            margin-left: 10px;
+        }
+
+        .group-stats {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .group-content {
+            display: block;
+        }
+
+        .group-content.hidden {
+            display: none;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            background: white;
+        }
+
+        th {
+            background-color: #0066cc;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #ddd;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: left;
+            font-size: 13px;
+        }
+
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .progress-bar {
+            background-color: #e0e0e0;
+            border-radius: 4px;
+            height: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background-color: #48bb78;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 11px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-fill.warning {
+            background-color: #f6ad55;
+        }
+
+        .progress-fill.danger {
+            background-color: #fc8181;
+        }
+
+        .status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 11px;
+            display: inline-block;
+        }
+
+        .status.pending {
+            background-color: #feebc8;
+            color: #7c2d12;
+        }
+
+        .status.proses {
+            background-color: #bee3f8;
+            color: #2c5282;
+        }
+
+        .status.selesai {
+            background-color: #c6f6d5;
+            color: #22543d;
+        }
+
+        .actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .actions button {
+            padding: 5px 10px;
+            font-size: 11px;
+            margin: 0;
+        }
+
+        .edit-btn {
+            background-color: #4299e1;
+        }
+
+        .edit-btn:hover {
+            background-color: #3182ce;
+        }
+
+        .delete-btn {
+            background-color: #ed8936;
+        }
+
+        .delete-btn:hover {
+            background-color: #dd6b20;
+        }
+
+        .empty-group {
+            color: #999;
+            text-align: center;
+            padding: 20px;
+            font-style: italic;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 5px;
+            width: 90%;
+            max-width: 450px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+            font-size: 13px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #0066cc;
+            box-shadow: 0 0 5px rgba(0, 102, 204, 0.3);
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .form-buttons button {
+            flex: 1;
+            padding: 10px;
+        }
+
+        .close {
+            float: right;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: red;
+        }
+
+        .export-format-selector {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .color-picker-wrapper {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .color-picker {
+            width: 60px;
+            height: 35px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .panel-types-list {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .panel-type-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            background: white;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            border-left: 4px solid;
+        }
+
+        .panel-type-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+        }
+
+        .panel-type-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+        }
+
+        .panel-type-delete {
+            background-color: #fc8181;
+            padding: 5px 10px;
+            font-size: 11px;
+        }
+
+        .panel-type-delete:hover {
+            background-color: #f56565;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab-button {
+            padding: 10px 20px;
+            background-color: #e0e0e0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .tab-button.active {
+            background-color: #0066cc;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @media (max-width: 1024px) {
+            .header-wrapper {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .logo-section {
+                justify-content: center;
+            }
+
+            .datetime-info {
+                text-align: center;
+                min-width: auto;
+            }
+
+            .company-info h1 {
+                font-size: 24px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header-wrapper {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .logo-section {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .company-logo {
+                width: 100px;
+                height: 80px;
+            }
+
+            .company-info h1 {
+                font-size: 20px;
+            }
+
+            .company-info p {
+                font-size: 12px;
+            }
+
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            th, td {
+                padding: 8px;
+                font-size: 12px;
+            }
+
+            button {
+                padding: 8px 12px;
+                font-size: 12px;
+            }
+
+            .filter-section {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .tabs {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-wrapper">
+        <div class="logo-section">
+            <div class="company-logo">
+                <svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: 100%;">
+                    <!-- Background -->
+                    <rect width="200" height="160" fill="transparent"/>
+                    
+                    <!-- Outer Diamond -->
+                    <path d="M 100 20 L 160 80 L 100 140 L 40 80 Z" fill="none" stroke="#00366d" stroke-width="3" stroke-linejoin="round"/>
+                    
+                    <!-- Inner Diamond -->
+                    <path d="M 100 35 L 145 80 L 100 125 L 55 80 Z" fill="none" stroke="#0066cc" stroke-width="2" stroke-linejoin="round"/>
+                    
+                    <!-- Center Circle -->
+                    <circle cx="100" cy="80" r="8" fill="#0066cc"/>
+                    
+                    <!-- AK Text -->
+                    <text x="100" y="90" font-size="36" font-weight="bold" fill="#0066cc" font-family="Arial, sans-serif" text-anchor="middle">AK</text>
+                    
+                    <!-- S Text -->
+                    <text x="100" y="130" font-size="20" font-weight="bold" fill="#0066cc" font-family="Arial, sans-serif" text-anchor="middle">S</text>
+                </svg>
+            </div>
+            <div class="company-info">
+                <h1>PT. ARYATEK KONTROL SEJAHTERA</h1>
+                <p>Monitoring Progress Panel System</p>
+            </div>
+        </div>
+        <div class="datetime-info">
+            <p id="currentDate"></p>
+            <p id="currentTime"></p>
+        </div>
+    </div>
+
+    <div class="info-box">
+        ℹ️ Status: <strong>Live Monitoring dengan Pengelompokan Dinamis</strong> - Kelola jenis panel sesuai kebutuhan dan lihat progress real-time
+    </div>
+
+    <div class="stats">
+        <div class="stat-box">
+            <div class="stat-label">Total Panel</div>
+            <div class="stat-value" id="totalPanel">0</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-label">Selesai</div>
+            <div class="stat-value" id="totalSelesai">0</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-label">Proses</div>
+            <div class="stat-value" id="totalProses">0</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-label">Rata-rata</div>
+            <div class="stat-value" id="avgProgress">0%</div>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-button active" onclick="switchTab('monitoring')">📊 Monitoring</button>
+        <button class="tab-button" onclick="switchTab('settings')">⚙️ Pengaturan Jenis Panel</button>
+    </div>
+
+    <!-- TAB MONITORING -->
+    <div id="monitoring" class="tab-content active">
+        <div class="controls">
+            <button onclick="openAddModal()">➕ Tambah Panel</button>
+            <button onclick="resetAllData()">🔄 Reset</button>
+            <div class="export-format-selector">
+                <button onclick="exportDataCSV()">📥 Export CSV</button>
+                <button onclick="exportDataExcel()">📊 Export Excel</button>
+            </div>
+        </div>
+
+        <div class="filter-section">
+            <label for="filterJenis">Filter Jenis Panel:</label>
+            <select id="filterJenis" onchange="applyFilter()">
+                <option value="">Semua Jenis</option>
+            </select>
+        </div>
+
+        <div id="groupedContent">
+            <!-- Konten dinamis akan diisi di sini -->
+        </div>
+    </div>
+
+    <!-- TAB PENGATURAN JENIS PANEL -->
+    <div id="settings" class="tab-content">
+        <div class="controls">
+            <button class="success" onclick="openAddPanelTypeModal()">➕ Tambah Jenis Panel Baru</button>
+        </div>
+
+        <div class="panel-types-list" id="panelTypesList">
+            <!-- Daftar jenis panel akan ditampilkan di sini -->
+        </div>
+    </div>
+</div>
+
+<!-- MODAL TAMBAH/EDIT PANEL -->
+<div id="panelModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closePanelModal()">&times;</span>
+        <div class="modal-header" id="panelModalTitle">Tambah Panel</div>
+        <form id="formPanel" onsubmit="savePanel(event)">
+            <div class="form-group">
+                <label>No</label>
+                <input type="number" id="inputNo" readonly>
+            </div>
+            <div class="form-group">
+                <label>Jenis Panel</label>
+                <select id="inputJenis" required>
+                    <option value="">-- Pilih Jenis --</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Kode Panel</label>
+                <input type="text" id="inputKode" placeholder="Contoh: MCC-01" required>
+            </div>
+            <div class="form-group">
+                <label>Progress (%)</label>
+                <input type="number" id="inputProgress" min="0" max="100" value="0" required>
+            </div>
+            <div class="form-group">
+                <label>Status</label>
+                <select id="inputStatus" required>
+                    <option value="Pending">Pending</option>
+                    <option value="Proses">Proses</option>
+                    <option value="Selesai">Selesai</option>
+                </select>
+            </div>
+            <div class="form-buttons">
+                <button type="submit">Simpan</button>
+                <button type="button" class="danger" onclick="closePanelModal()">Batal</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL TAMBAH/EDIT JENIS PANEL -->
+<div id="panelTypeModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closePanelTypeModal()">&times;</span>
+        <div class="modal-header" id="panelTypeModalTitle">Tambah Jenis Panel</div>
+        <form id="formPanelType" onsubmit="savePanelType(event)">
+            <div class="form-group">
+                <label>Kode Jenis (Singkat, max 4 karakter)</label>
+                <input type="text" id="typeCode" maxlength="4" placeholder="Contoh: MCC, PCC" required>
+            </div>
+            <div class="form-group">
+                <label>Nama Lengkap</label>
+                <input type="text" id="typeName" placeholder="Contoh: Main Control Cabinet" required>
+            </div>
+            <div class="form-group">
+                <label>Warna (Hex Code)</label>
+                <div class="color-picker-wrapper">
+                    <input type="color" id="typeColor" value="#0066cc" required>
+                    <input type="text" id="typeColorHex" placeholder="#0066cc" value="#0066cc" readonly style="flex: 1; background-color: #f9f9f9;">
+                </div>
+            </div>
+            <div class="form-buttons">
+                <button type="submit">Simpan</button>
+                <button type="button" class="danger" onclick="closePanelTypeModal()">Batal</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+
+// API Configuration
+const API_BASE_URL = window.location.origin + '/api' || 'http://localhost:3000/api';
+
+// DATA
+let dataPanel = [];
+let panelTypes = [
+    {code: 'MCC', name: 'MCC (Main Control Cabinet)', color: '#0066cc'},
+    {code: 'PCC', name: 'PCC (Power Control Cabinet)', color: '#00a86b'},
+    {code: 'DCC', name: 'DCC (Distribution Control Cabinet)', color: '#ff6b35'},
+    {code: 'LCC', name: 'LCC (Local Control Cabinet)', color: '#f7b801'}
+];
+
+let editingId = null;
+let editingTypeCode = null;
+let filterJenis = "";
+
+// INITIAL DATA
+function initializeData() {
+    if (dataPanel.length === 0) {
+        dataPanel = [
+            {id: 1, no: 1, jenis: "MCC", kode: "MCC-01", progress: 20, status: "Proses"},
+            {id: 2, no: 2, jenis: "PCC", kode: "PCC-02", progress: 50, status: "Proses"},
+            {id: 3, no: 3, jenis: "MCC", kode: "MCC-03", progress: 100, status: "Selesai"},
+            {id: 4, no: 4, jenis: "DCC", kode: "DCC-01", progress: 30, status: "Proses"},
+            {id: 5, no: 5, jenis: "LCC", kode: "LCC-01", progress: 70, status: "Proses"}
+        ];
+    }
+}
+
+// LOAD DATA FROM LOCALSTORAGE
+function loadData() {
+    const savedPanelTypes = localStorage.getItem('panelTypes');
+    const savedDataPanel = localStorage.getItem('dataPanel');
+    
+    if (savedPanelTypes) {
+        panelTypes = JSON.parse(savedPanelTypes);
+    }
+    
+    if (savedDataPanel) {
+        dataPanel = JSON.parse(savedDataPanel);
+    } else {
+        initializeData();
+    }
+    
+    updateFilterOptions();
+    updatePanelTypeSelect();
+    tampilkanData();
+    displayPanelTypes();
+}
+
+// SAVE DATA TO LOCALSTORAGE
+function saveDataToStorage() {
+    localStorage.setItem('panelTypes', JSON.stringify(panelTypes));
+    localStorage.setItem('dataPanel', JSON.stringify(dataPanel));
+}
+
+// UPDATE FILTER OPTIONS
+function updateFilterOptions() {
+    const filterSelect = document.getElementById('filterJenis');
+    const currentValue = filterSelect.value;
+    filterSelect.innerHTML = '<option value="">Semua Jenis</option>';
+    
+    panelTypes.forEach(type => {
+        const option = document.createElement('option');
+        option.value = type.code;
+        option.textContent = type.name;
+        filterSelect.appendChild(option);
+    });
+    
+    filterSelect.value = currentValue;
+}
+
+// UPDATE PANEL TYPE SELECT IN MODAL
+function updatePanelTypeSelect() {
+    const select = document.getElementById('inputJenis');
+    const currentValue = select.value;
+    select.innerHTML = '<option value="">-- Pilih Jenis --</option>';
+    
+    panelTypes.forEach(type => {
+        const option = document.createElement('option');
+        option.value = type.code;
+        option.textContent = type.name;
+        select.appendChild(option);
+    });
+    
+    select.value = currentValue;
+}
+
+// UPDATE DATE AND TIME
+function updateDateTime() {
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
+    const timeStr = now.toLocaleTimeString('id-ID');
+    document.getElementById('currentDate').textContent = dateStr;
+    document.getElementById('currentTime').textContent = timeStr;
+}
+
+// RENDER DATA GROUPED
+function tampilkanData() {
+    const container = document.getElementById("groupedContent");
+    container.innerHTML = "";
+
+    let filteredData = dataPanel;
+    if (filterJenis) {
+        filteredData = dataPanel.filter(p => p.jenis === filterJenis);
+    }
+
+    if (filteredData.length === 0) {
+        container.innerHTML = "<div class='empty-group'>Tidak ada data panel</div>";
+        updateStats();
+        return;
+    }
+
+    const grouped = {};
+    filteredData.forEach(item => {
+        if (!grouped[item.jenis]) {
+            grouped[item.jenis] = [];
+        }
+        grouped[item.jenis].push(item);
+    });
+
+    Object.keys(grouped).sort().forEach(jenis => {
+        const items = grouped[jenis];
+        const groupStats = calculateGroupStats(items);
+        const panelType = panelTypes.find(t => t.code === jenis);
+        const color = panelType ? panelType.color : '#0066cc';
+        
+        const groupDiv = document.createElement("div");
+        groupDiv.className = "group-section";
+        
+        const groupId = `group-${jenis}`;
+        
+        groupDiv.innerHTML = `
+            <div class="group-header" onclick="toggleGroup('${groupId}')" style="background: linear-gradient(135deg, ${color} 0%, ${adjustColor(color, -20)} 100%);">
+                <span class="group-toggle">▼</span>
+                <span class="group-title" style="border-left: 4px solid ${color}; padding-left: 10px;">
+                    ${panelType ? panelType.name : jenis}
+                </span>
+                <span class="group-stats">
+                    Total: ${items.length} | Selesai: ${groupStats.selesai} | Progress Rata-rata: ${groupStats.avgProgress}%
+                </span>
+            </div>
+            <div class="group-content" id="${groupId}">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Kode Panel</th>
+                            <th>Progress</th>
+                            <th>Status</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-${jenis}">
+                    </tbody>
+                </table>
+            </div>
+        `;
+        
+        container.appendChild(groupDiv);
+
+        const tbody = document.getElementById(`tbody-${jenis}`);
+        items.forEach(item => {
+            let statusClass = item.status.toLowerCase();
+            let progressClass = item.progress < 30 ? "danger" : item.progress < 70 ? "warning" : "";
+            let progressText = item.progress >= 100 ? "✓ 100%" : item.progress + "%";
+
+            let row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${item.no}</td>
+                <td><strong>${item.kode}</strong></td>
+                <td>
+                    <div class="progress-bar">
+                        <div class="progress-fill ${progressClass}" style="width: ${item.progress}%; background-color: ${color};">
+                            ${item.progress >= 15 ? progressText : ""}
+                        </div>
+                    </div>
+                </td>
+                <td><span class="status ${statusClass}">${item.status}</span></td>
+                <td>
+                    <div class="actions">
+                        <button type="button" class="edit-btn" onclick="openEditModal(${item.id})">Edit</button>
+                        <button type="button" class="delete-btn" onclick="deletePanel(${item.id})">Hapus</button>
+                    </div>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+    });
+
+    updateStats();
+}
+
+// DISPLAY PANEL TYPES
+function displayPanelTypes() {
+    const container = document.getElementById('panelTypesList');
+    container.innerHTML = '';
+
+    if (panelTypes.length === 0) {
+        container.innerHTML = '<div class="empty-group">Belum ada jenis panel yang didefinisikan</div>';
+        return;
+    }
+
+    panelTypes.forEach(type => {
+        const typeDiv = document.createElement('div');
+        typeDiv.className = 'panel-type-item';
+        typeDiv.style.borderLeftColor = type.color;
+        
+        typeDiv.innerHTML = `
+            <div class="panel-type-info">
+                <div class="panel-type-color" style="background-color: ${type.color};"></div>
+                <div>
+                    <strong>${type.code}</strong> - ${type.name}
+                    <div style="font-size: 11px; color: #999;">
+                        Warna: ${type.color}
+                    </div>
+                </div>
+            </div>
+            <div style="display: flex; gap: 5px;">
+                <button type="button" class="edit-btn" onclick="openEditPanelTypeModal('${type.code}')" style="padding: 5px 10px; font-size: 11px;">Edit</button>
+                <button type="button" class="panel-type-delete" onclick="deletePanelType('${type.code}')">Hapus</button>
+            </div>
+        `;
+        container.appendChild(typeDiv);
+    });
+}
+
+// TOGGLE GROUP
+function toggleGroup(groupId) {
+    const content = document.getElementById(groupId);
+    content.classList.toggle("hidden");
+}
+
+// CALCULATE GROUP STATS
+function calculateGroupStats(items) {
+    const selesai = items.filter(p => p.status === "Selesai").length;
+    const avgProgress = items.length > 0 
+        ? Math.round(items.reduce((sum, p) => sum + p.progress, 0) / items.length)
+        : 0;
+    
+    return { selesai, avgProgress };
+}
+
+// UPDATE STATS
+function updateStats() {
+    const total = dataPanel.length;
+    const selesai = dataPanel.filter(p => p.status === "Selesai").length;
+    const proses = dataPanel.filter(p => p.status === "Proses").length;
+    const avgProgress = total > 0 
+        ? Math.round(dataPanel.reduce((sum, p) => sum + p.progress, 0) / total)
+        : 0;
+
+    document.getElementById("totalPanel").textContent = total;
+    document.getElementById("totalSelesai").textContent = selesai;
+    document.getElementById("totalProses").textContent = proses;
+    document.getElementById("avgProgress").textContent = avgProgress + "%";
+}
+
+// APPLY FILTER
+function applyFilter() {
+    filterJenis = document.getElementById("filterJenis").value;
+    tampilkanData();
+}
+
+// MODAL FUNCTIONS
+function openAddModal() {
+    editingId = null;
+    document.getElementById("panelModalTitle").textContent = "Tambah Panel";
+    document.getElementById("inputNo").value = dataPanel.length + 1;
+    document.getElementById("inputJenis").value = "";
+    document.getElementById("inputKode").value = "";
+    document.getElementById("inputProgress").value = "0";
+    document.getElementById("inputStatus").value = "Pending";
+    document.getElementById("panelModal").style.display = "block";
+}
+
+function openEditModal(id) {
+    const item = dataPanel.find(p => p.id === id);
+    if (!item) return;
+
+    editingId = id;
+    document.getElementById("panelModalTitle").textContent = "Edit Panel";
+    document.getElementById("inputNo").value = item.no;
+    document.getElementById("inputJenis").value = item.jenis;
+    document.getElementById("inputKode").value = item.kode;
+    document.getElementById("inputProgress").value = item.progress;
+    document.getElementById("inputStatus").value = item.status;
+    document.getElementById("panelModal").style.display = "block";
+}
+
+function closePanelModal() {
+    document.getElementById("panelModal").style.display = "none";
+    editingId = null;
+}
+
+function openAddPanelTypeModal() {
+    editingTypeCode = null;
+    document.getElementById("panelTypeModalTitle").textContent = "Tambah Jenis Panel Baru";
+    document.getElementById("typeCode").value = "";
+    document.getElementById("typeName").value = "";
+    document.getElementById("typeColor").value = "#0066cc";
+    document.getElementById("typeColorHex").value = "#0066cc";
+    document.getElementById("panelTypeModal").style.display = "block";
+}
+
+function openEditPanelTypeModal(code) {
+    const type = panelTypes.find(t => t.code === code);
+    if (!type) return;
+
+    editingTypeCode = code;
+    document.getElementById("panelTypeModalTitle").textContent = "Edit Jenis Panel";
+    document.getElementById("typeCode").value = type.code;
+    document.getElementById("typeCode").disabled = true;
+    document.getElementById("typeName").value = type.name;
+    document.getElementById("typeColor").value = type.color;
+    document.getElementById("typeColorHex").value = type.color;
+    document.getElementById("panelTypeModal").style.display = "block";
+}
+
+function closePanelTypeModal() {
+    document.getElementById("panelTypeModal").style.display = "none";
+    document.getElementById("typeCode").disabled = false;
+    editingTypeCode = null;
+}
+
+// SAVE PANEL
+function savePanel(event) {
+    event.preventDefault();
+
+    const jenis = document.getElementById("inputJenis").value.trim();
+    const kode = document.getElementById("inputKode").value.trim();
+    const progress = parseInt(document.getElementById("inputProgress").value);
+    const status = document.getElementById("inputStatus").value;
+
+    if (!jenis) {
+        alert("Jenis panel tidak boleh kosong!");
+        return;
+    }
+
+    if (!kode) {
+        alert("Kode panel tidak boleh kosong!");
+        return;
+    }
+
+    if (editingId === null) {
+        const newId = Math.max(...dataPanel.map(p => p.id), 0) + 1;
+        dataPanel.push({
+            id: newId,
+            no: dataPanel.length + 1,
+            jenis: jenis,
+            kode: kode,
+            progress: progress,
+            status: status
+        });
+    } else {
+        const item = dataPanel.find(p => p.id === editingId);
+        if (item) {
+            item.jenis = jenis;
+            item.kode = kode;
+            item.progress = progress;
+            item.status = status;
+        }
+    }
+
+    saveDataToStorage();
+    tampilkanData();
+    closePanelModal();
+}
+
+// SAVE PANEL TYPE
+function savePanelType(event) {
+    event.preventDefault();
+
+    const code = document.getElementById("typeCode").value.trim().toUpperCase();
+    const name = document.getElementById("typeName").value.trim();
+    const color = document.getElementById("typeColor").value;
+
+    if (!code) {
+        alert("Kode jenis tidak boleh kosong!");
+        return;
+    }
+
+    if (!name) {
+        alert("Nama lengkap tidak boleh kosong!");
+        return;
+    }
+
+    if (editingTypeCode === null) {
+        if (panelTypes.some(t => t.code === code)) {
+            alert("Kode jenis sudah ada! Gunakan kode yang berbeda.");
+            return;
+        }
+
+        panelTypes.push({
+            code: code,
+            name: name,
+            color: color
+        });
+    } else {
+        const type = panelTypes.find(t => t.code === editingTypeCode);
+        if (type) {
+            type.name = name;
+            type.color = color;
+        }
+    }
+
+    panelTypes.sort((a, b) => a.code.localeCompare(b.code));
+
+    saveDataToStorage();
+    updateFilterOptions();
+    updatePanelTypeSelect();
+    displayPanelTypes();
+    tampilkanData();
+    closePanelTypeModal();
+}
+
+// DELETE PANEL
+function deletePanel(id) {
+    if (confirm("Hapus panel ini?")) {
+        dataPanel = dataPanel.filter(p => p.id !== id);
+        dataPanel.forEach((item, index) => {
+            item.no = index + 1;
+        });
+        saveDataToStorage();
+        tampilkanData();
+    }
+}
+
+// DELETE PANEL TYPE
+function deletePanelType(code) {
+    const panelsWithType = dataPanel.filter(p => p.jenis === code);
+    
+    if (panelsWithType.length > 0) {
+        alert(`Tidak dapat menghapus! Masih ada ${panelsWithType.length} panel dengan jenis ini. Hapus panel terlebih dahulu.`);
+        return;
+    }
+
+    if (confirm(`Hapus jenis panel "${code}"?`)) {
+        panelTypes = panelTypes.filter(t => t.code !== code);
+        saveDataToStorage();
+        updateFilterOptions();
+        updatePanelTypeSelect();
+        displayPanelTypes();
+        tampilkanData();
+    }
+}
+
+// RESET DATA
+function resetAllData() {
+    if (confirm("Reset ke data awal?")) {
+        dataPanel = [
+            {id: 1, no: 1, jenis: "MCC", kode: "MCC-01", progress: 20, status: "Proses"},
+            {id: 2, no: 2, jenis: "PCC", kode: "PCC-02", progress: 50, status: "Proses"},
+            {id: 3, no: 3, jenis: "MCC", kode: "MCC-03", progress: 100, status: "Selesai"},
+            {id: 4, no: 4, jenis: "DCC", kode: "DCC-01", progress: 30, status: "Proses"},
+            {id: 5, no: 5, jenis: "LCC", kode: "LCC-01", progress: 70, status: "Proses"}
+        ];
+        panelTypes = [
+            {code: 'MCC', name: 'MCC (Main Control Cabinet)', color: '#0066cc'},
+            {code: 'PCC', name: 'PCC (Power Control Cabinet)', color: '#00a86b'},
+            {code: 'DCC', name: 'DCC (Distribution Control Cabinet)', color: '#ff6b35'},
+            {code: 'LCC', name: 'LCC (Local Control Cabinet)', color: '#f7b801'}
+        ];
+        filterJenis = "";
+        document.getElementById("filterJenis").value = "";
+        saveDataToStorage();
+        loadData();
+    }
+}
+
+// EXPORT DATA CSV
+function exportDataCSV() {
+    if (dataPanel.length === 0) {
+        alert("Tidak ada data!");
+        return;
+    }
+
+    let csv = "PT. ARYATEK KONTROL SEJAHTERA\nMonitoring Progress Panel\n\n";
+    csv += "No,Jenis Panel,Kode Panel,Progress,Status\n";
+    dataPanel.forEach(item => {
+        const panelType = panelTypes.find(t => t.code === item.jenis);
+        csv += `${item.no},"${panelType ? panelType.name : item.jenis}","${item.kode}",${item.progress}%,"${item.status}"\n`;
+    });
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");  
+    link.href = URL.createObjectURL(blob);
+    link.download = `monitoring-panel-aks-${new Date().getTime()}.csv`;
+    link.click();
+}
+
+// EXPORT DATA EXCEL
+function exportDataExcel() {
+    if (dataPanel.length === 0) {
+        alert("Tidak ada data!");
+        return;
+    }
+
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet([]);
+
+    ws['A1'] = { v: 'PT. ARYATEK KONTROL SEJAHTERA', t: 's' };
+    ws['A1'].font = { bold: true, size: 14, color: { rgb: 'FF00366d' } };
+    ws.merge_cells('A1:E1');
+
+    ws['A2'] = { v: 'MONITORING PROGRESS PANEL', t: 's' };
+    ws['A2'].font = { bold: true, size: 12, color: { rgb: 'FF0066cc' } };
+    ws.merge_cells('A2:E2');
+
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
+    ws['A3'] = { v: 'Tanggal: ' + dateStr, t: 's' };
+    ws['A3'].font = { size: 11 };
+
+    const headers = ['No', 'Jenis Panel', 'Kode Panel', 'Progress (%)', 'Status'];
+    headers.forEach((header, idx) => {
+        ws[XLSX.utils.encode_cell({ r: 4, c: idx })] = { v: header, t: 's' };
+        ws[XLSX.utils.encode_cell({ r: 4, c: idx })].fill = { fgColor: { rgb: 'FF0066cc' } };
+        ws[XLSX.utils.encode_cell({ r: 4, c: idx })].font = { bold: true, color: { rgb: 'FFFFFFFF' } };
+        ws[XLSX.utils.encode_cell({ r: 4, c: idx })].alignment = { horizontal: 'center', vertical: 'center' };
+    });
+
+    dataPanel.forEach((item, idx) => {
+        const rowIdx = 5 + idx;
+        const panelType = panelTypes.find(t => t.code === item.jenis);
+        
+        ws[XLSX.utils.encode_cell({ r: rowIdx, c: 0 })] = { v: item.no, t: 'n' };
+        ws[XLSX.utils.encode_cell({ r: rowIdx, c: 1 })] = { v: panelType ? panelType.name : item.jenis, t: 's' };
+        ws[XLSX.utils.encode_cell({ r: rowIdx, c: 2 })] = { v: item.kode, t: 's' };
+        ws[XLSX.utils.encode_cell({ r: rowIdx, c: 3 })] = { v: item.progress, t: 'n' };
+        ws[XLSX.utils.encode_cell({ r: rowIdx, c: 4 })] = { v: item.status, t: 's' };
+
+        if (idx % 2 === 0) {
+            for (let c = 0; c < 5; c++) {
+                ws[XLSX.utils.encode_cell({ r: rowIdx, c: c })].fill = { fgColor: { rgb: 'FFF0f0f0' } };
+            }
+        }
+    });
+
+    const summaryRow = 6 + dataPanel.length;
+    ws[XLSX.utils.encode_cell({ r: summaryRow + 1, c: 0 })] = { v: 'RINGKASAN DATA', t: 's' };
+    ws[XLSX.utils.encode_cell({ r: summaryRow + 1, c: 0 })].font = { bold: true, size: 11, color: { rgb: 'FF00366d' } };
+    ws[XLSX.utils.encode_cell({ r: summaryRow + 1, c: 0 })].fill = { fgColor: { rgb: 'FFe3f2fd' } };
+
+    const total = dataPanel.length;
+    const selesai = dataPanel.filter(p => p.status === "Selesai").length;
+    const proses = dataPanel.filter(p => p.status === "Proses").length;
+    const pending = dataPanel.filter(p => p.status === "Pending").length;
+    const avgProgress = total > 0 ? Math.round(dataPanel.reduce((sum, p) => sum + p.progress, 0) / total) : 0;
+
+    const summaryData = [
+        ['Total Panel', total],
+        ['Status Selesai', selesai],
+        ['Status Proses', proses],
+        ['Status Pending', pending],
+        ['Rata-rata Progress (%)', avgProgress]
+    ];
+
+    summaryData.forEach((row, idx) => {
+        const rowIdx = summaryRow + 2 + idx;
+        ws[XLSX.utils.encode_cell({ r: rowIdx, c: 0 })] = { v: row[0], t: 's' };
+        ws[XLSX.utils.encode_cell({ r: rowIdx, c: 1 })] = { v: row[1], t: 'n' };
+        ws[XLSX.utils.encode_cell({ r: rowIdx, c: 1 })].font = { bold: true };
+    });
+
+    ws['!cols'] = [
+        { wch: 5 },
+        { wch: 30 },
+        { wch: 15 },
+        { wch: 15 },
+        { wch: 12 }
+    ];
+
+    XLSX.utils.book_append_sheet(wb, ws, 'Monitoring Panel');
+    XLSX.writeFile(wb, `monitoring-panel-aks-${new Date().getTime()}.xlsx`);
+}
+
+// SWITCH TAB
+function switchTab(tabName) {
+    const tabContents = document.querySelectorAll('.tab-content');
+    const tabButtons = document.querySelectorAll('.tab-button');
+    
+    tabContents.forEach(tab => tab.classList.remove('active'));
+    tabButtons.forEach(btn => btn.classList.remove('active'));
+    
+    document.getElementById(tabName).classList.add('active');
+    event.target.classList.add('active');
+}
+
+// COLOR PICKER SYNC
+document.addEventListener('DOMContentLoaded', function() {
+    const colorInput = document.getElementById('typeColor');
+    const colorHex = document.getElementById('typeColorHex');
+    
+    if (colorInput) {
+        colorInput.addEventListener('input', function() {
+            colorHex.value = this.value;
+        });
+    }
+});
+
+// ADJUST COLOR (DARKEN)
+function adjustColor(color, percent) {
+    const num = parseInt(color.slice(1), 16);
+    const amt = Math.round(2.55 * percent);
+    const R = (num >> 16) + amt;
+    const G = (num >> 8 & 0x00FF) + amt;
+    const B = (num & 0x0000FF) + amt;
+    return "#" + (0x1000000 + (R<255?R<1?0:R:255)*0x10000 +
+        (G<255?G<1?0:G:255)*0x100 + (B<255?B<1?0:B:255))
+        .toString(16).slice(1);
+}
+
+// MODAL CLICK OUTSIDE
+window.onclick = function(event) {
+    const panelModal = document.getElementById("panelModal");
+    const panelTypeModal = document.getElementById("panelTypeModal");
+    
+    if (event.target === panelModal) {
+        closePanelModal();
+    }
+    if (event.target === panelTypeModal) {
+        closePanelTypeModal();
+    }
+}
+
+// INIT
+document.addEventListener("DOMContentLoaded", function() {
+    updateDateTime();
+    setInterval(updateDateTime, 1000);
+    loadData();
+});
+
+</script>
+
+</body>
+</html>
